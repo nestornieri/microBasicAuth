@@ -27,8 +27,5 @@ public class RestTemplateConfig {
         return restTemplate;
     }
 
-    @Bean(name = "publicRestTemplate")
-    public RestTemplate publicRestTemplate() {
-        return new RestTemplate(); // Sin autenticación
-    }
+
 }
