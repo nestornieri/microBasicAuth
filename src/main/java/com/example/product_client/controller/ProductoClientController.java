@@ -3,6 +3,7 @@ package com.example.product_client.controller;
 import com.example.product_client.model.Producto;
 import com.example.product_client.model.ProductoDTO;
 import com.example.product_client.service.ProductoClientService;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/client")
+
 public class ProductoClientController {
 
     private final ProductoClientService productoClientService;
@@ -18,8 +20,6 @@ public class ProductoClientController {
     public ProductoClientController(ProductoClientService productoClientService) {
         this.productoClientService = productoClientService;
     }
-
-
 
     @GetMapping("/all")
     public List<Producto> getAllProductos() {

@@ -3,6 +3,7 @@ import com.example.product_client.model.Producto;
 import com.example.product_client.model.ProductoDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +16,24 @@ import java.util.List;
 public class ProductoClientService {
 
     private final RestTemplate restTemplate;
-    private final String baseUrl;
+    private final DiscoveryClient discoveryClient;
 
     public ProductoClientService(
-            @Qualifier("authRestTemplate") RestTemplate restTemplate, // Especificar authRestTemplate
-            @Value("${producto.service.url}") String baseUrl) {
+            @Qualifier("authRestTemplate") RestTemplate restTemplate,
+            DiscoveryClient discoveryClient) {
         this.restTemplate = restTemplate;
-        this.baseUrl = baseUrl;
+        this.discoveryClient = discoveryClient;
     }
+
+    private String getServiceUrl() {
+        return discoveryClient.getInstances("producto-service")
+                .stream()
+                .findFirst()
+                .map(serviceInstance -> serviceInstance.getUri().toString())
+                .orElseThrow(() -> new RuntimeException("Producto Service no disponible"));
+    }
+
+
     /*
     public List<ProductoDTO> getAllProductosDTO() {
         ResponseEntity<List<ProductoDTO>> response = restTemplate.exchange(
@@ -34,9 +45,11 @@ public class ProductoClientService {
         return response.getBody();
     }
     */
+
     public List<Producto> getAllProductos() {
+        String baseUrl = getServiceUrl();
         ResponseEntity<List<Producto>> response = restTemplate.exchange(
-                baseUrl + "/all",
+                baseUrl + "/listarProductos",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Producto>>() {}
@@ -45,19 +58,23 @@ public class ProductoClientService {
     }
 
     public Producto getProductoById(Integer id) {
+        String baseUrl = getServiceUrl();
         return restTemplate.getForObject(baseUrl + "/{id}", Producto.class, id);
     }
 
     public Producto createProducto(Producto producto) {
+        String baseUrl = getServiceUrl();
         return restTemplate.postForObject(baseUrl + "/create", producto, Producto.class);
     }
 
     public Producto updateProducto(Integer id, Producto producto) {
+        String baseUrl = getServiceUrl();
         restTemplate.put(baseUrl + "/{id}", producto, id);
         return producto;
     }
 
     public String deleteProducto(Integer id) {
+        String baseUrl = getServiceUrl();
         ResponseEntity<String> response = restTemplate.exchange(
                 baseUrl + "/{id}",
                 HttpMethod.DELETE,

@@ -8,10 +8,11 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestTemplateConfig {
-
+    //Removemos url, ya que se obtendra de EUREKA.
+    /*
     @Value("${producto.service.url}")
     private String baseUrl;
-
+    */
     @Value("${producto.service.username}")
     private String username;
 
